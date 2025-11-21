@@ -1,0 +1,347 @@
+@startuml
+class ui.command.SortSaladsByCaloriesCommand {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.EditVegetableCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class saving.SaladRepository {
+- List<Salad> savedSalads
+- String DIRECTORY_PATH
+- ProductRepository productRepository
++ void loadAllSalads()
++ void saveSalad(Salad)
++ void deleteSalad(String)
++ List<Salad> getAllSalads()
++ Optional<Salad> getSaladByName(String)
+}
+
+
+class products.RootVegetable {
+- double sugarContent
+- boolean isHard
++ double getSugarContent()
++ boolean isHard()
++ Optional<String> getCookingTip()
+}
+
+
+class ui.command.RemoveSaladCommand {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.RemoveToppingCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+interface products.IProduct {
+~ String getName()
+~ double getCaloriesPer100g()
+~ Optional<String> getCookingTip()
+}
+
+class ui.command.ViewSaladRecipe {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class salad.Salad {
+- String name
+- List<SaladIngredient> ingredients
++ String getName()
++ List<SaladIngredient> getIngredients()
++ void setName(String)
++ void addIngredient(SaladIngredient)
++ void removeIngredient(SaladIngredient)
+}
+
+
+class ui.command.EditDressingCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class saving.ProductRepository {
+- List<IProduct> availableProducts
+- String FILE_PATH
++ void loadFromFile()
++ void saveToFile()
++ List<IProduct> getAllProducts()
++ void addProduct(IProduct)
++ void removeProduct(IProduct)
++ Optional<IProduct> getProductByName(String)
+}
+
+
+class service.SaladService {
+- SaladRepository saladRepository
+- ProductRepository productRepository
++ void createNewSalad()
++ void viewSalads()
++ void editSalad()
++ void removeSalad()
++ void viewSaladRecipe()
++ void sortIngredients()
++ void sortSaladsByCalories()
++ void findVegetablesByCalories()
+}
+
+
+class ui.command.AddNewDressingCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.ViewVegetablesCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+interface ui.command.Command {
+~ void execute()
+~ String getMenuTitle()
+}
+
+class products.Topping {
+- String name
+- double caloriesPer100g
+- boolean isCrunchy
++ String getName()
++ double getCaloriesPer100g()
++ Optional<String> getCookingTip()
++ boolean isCrunchy()
+}
+
+
+class ui.command.ViewToppingsCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.EditSaladCommand {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class products.TuberVegetable {
+- double starchContent
++ double getStarchContent()
++ Optional<String> getCookingTip()
+}
+
+
+class ui.command.ViewSaladsCommand {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class service.ProductService {
+- ProductRepository productRepository
++ void addNewVegetable()
++ void addNewDressing()
++ void addNewTopping()
++ void viewVegetables()
++ void viewDressings()
++ void viewToppings()
++ void editVegetable()
++ void editDressing()
++ void editTopping()
++ void removeVegetable()
++ void removeDressing()
++ void removeTopping()
+}
+
+
+class ui.command.CreateSaladCommand {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class Main {
++ {static} void main(String[])
+}
+
+class ui.command.FindVegetablesByCaloriesCommand {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.RemoveVegetableCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.AddNewToppingCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class products.FruitingVegetable {
+- double waterContentPercent
++ double getWaterContentPercent()
++ boolean needsSeedRemoval()
++ Optional<String> getCookingTip()
+}
+
+
+class ui.command.RemoveDressingCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class products.LeafyVegetable {
+- double fiberContent
++ double getFiberContent()
++ Optional<String> getCookingTip()
+}
+
+
+class salad.SaladIngredient {
+- IProduct product
+- double weightInGrams
++ IProduct getConsumable()
++ double getWeightInGrams()
++ double getTotalCalories()
++ String toString()
+}
+
+
+class ui.command.ExitCommand {
++ void execute()
++ String getMenuTitle()
+}
+
+abstract class products.Vegetable {
+- String name
+- double caloriesPer100g
++ String getName()
++ double getCaloriesPer100g()
++ Optional<String> getCookingTip()
+}
+
+
+class ui.command.SortIngredientsCommand {
+- SaladService saladService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.EditToppingCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.AddNewVegetableCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.command.MenuSeparatorCommand {
+- String title
++ void execute()
++ String getMenuTitle()
+}
+
+
+class products.Dressing {
+- String name
+- double caloriesPer100g
+- String baseType
++ String getName()
++ double getCaloriesPer100g()
++ Optional<String> getCookingTip()
++ String getBaseType()
+}
+
+
+class ui.command.ViewDressingsCommand {
+- ProductService productService
++ void execute()
++ String getMenuTitle()
+}
+
+
+class ui.ConsoleMenu {
+- Map<String,Command> menuItems
+- Scanner scanner
++ void addMenuItem(String,Command)
++ void run()
+- void printMenu()
+}
+
+
+
+
+ui.command.Command <|.. ui.command.SortSaladsByCaloriesCommand
+ui.command.Command <|.. ui.command.EditVegetableCommand
+products.Vegetable <|-- products.RootVegetable
+ui.command.Command <|.. ui.command.RemoveSaladCommand
+ui.command.Command <|.. ui.command.RemoveToppingCommand
+ui.command.Command <|.. ui.command.ViewSaladRecipe
+ui.command.Command <|.. ui.command.EditDressingCommand
+ui.command.Command <|.. ui.command.AddNewDressingCommand
+ui.command.Command <|.. ui.command.ViewVegetablesCommand
+products.IProduct <|.. products.Topping
+ui.command.Command <|.. ui.command.ViewToppingsCommand
+ui.command.Command <|.. ui.command.EditSaladCommand
+products.Vegetable <|-- products.TuberVegetable
+ui.command.Command <|.. ui.command.ViewSaladsCommand
+ui.command.Command <|.. ui.command.CreateSaladCommand
+ui.command.Command <|.. ui.command.FindVegetablesByCaloriesCommand
+ui.command.Command <|.. ui.command.RemoveVegetableCommand
+ui.command.Command <|.. ui.command.AddNewToppingCommand
+products.Vegetable <|-- products.FruitingVegetable
+ui.command.Command <|.. ui.command.RemoveDressingCommand
+products.Vegetable <|-- products.LeafyVegetable
+ui.command.Command <|.. ui.command.ExitCommand
+products.IProduct <|.. products.Vegetable
+ui.command.Command <|.. ui.command.SortIngredientsCommand
+ui.command.Command <|.. ui.command.EditToppingCommand
+ui.command.Command <|.. ui.command.AddNewVegetableCommand
+ui.command.Command <|.. ui.command.MenuSeparatorCommand
+products.IProduct <|.. products.Dressing
+ui.command.Command <|.. ui.command.ViewDressingsCommand
+@enduml

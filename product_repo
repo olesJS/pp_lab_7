@@ -1,0 +1,20 @@
+FruitingVegetable;Помідор;20,00;95,00;false
+FruitingVegetable;Огірок;15,00;98,00;false
+LeafyVegetable;Айсберг;14,00;1,20
+TuberVegetable;Картопля;77,00;18,00
+FruitingVegetable;Болгарський перець;27,00;80,00;true
+LeafyVegetable;Рукола;25,00;1,60
+RootVegetable;Морква;41,00;4,70;true
+RootVegetable;Буряк;49,00;9,00;true
+Dressing;Сметана;175,00;Вершкова
+Dressing;Майонез;675,00;Вершкова
+Dressing;Оливкова олія;880,00;Олійна
+Dressing;Соняшникова олія;895,00;Олійна
+Dressing;Лляна олія;900,00;Олійна
+Dressing;Оцет;12,00;Кисла
+Topping;Фета;265,00;false
+Topping;Моцарела;280,00;false
+Topping;Кунжут;573,00;true
+Topping;Сухарики;450,00;true
+Topping;Грецькі горіхи;654,00;false
+RootVegetable;Імбир;20,00;2,00;true
