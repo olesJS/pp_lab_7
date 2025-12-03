@@ -3,6 +3,8 @@ import ui.command.*;
 import service.*;
 import saving.*;
 
+import java.util.Scanner;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -14,8 +16,8 @@ public class Main {
         saladRepo.loadAllSalads();
 
         // Отримувачі
-        ProductService productService = new ProductService(prodRepo);
-        SaladService saladService = new SaladService(saladRepo, prodRepo);
+        ProductService productService = new ProductService(prodRepo, new Scanner(System.in));
+        SaladService saladService = new SaladService(saladRepo, prodRepo, new Scanner(System.in));
 
         // Викликач
         ConsoleMenu menu = new ConsoleMenu();

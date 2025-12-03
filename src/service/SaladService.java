@@ -19,10 +19,10 @@ public class SaladService {
     private final ProductRepository productRepository;
     private final Scanner scanner;
 
-    public SaladService(SaladRepository sRepo, ProductRepository pRepo) {
+    public SaladService(SaladRepository sRepo, ProductRepository pRepo, Scanner scanner) {
         this.saladRepository = sRepo;
         this.productRepository = pRepo;
-        this.scanner = new Scanner(System.in);
+        this.scanner = scanner;
     }
 
     private double calculateTotalCalories(Salad salad) {

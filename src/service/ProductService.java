@@ -16,9 +16,9 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final Scanner scanner;
 
-    public ProductService(ProductRepository repo) {
+    public ProductService(ProductRepository repo, Scanner scanner) {
         this.productRepository = repo;
-        this.scanner = new Scanner(System.in);
+        this.scanner = scanner;
     }
 
     private <T extends IProduct> List<T> filterProductsByType(Class<T> type) {

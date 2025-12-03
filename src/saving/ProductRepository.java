@@ -73,12 +73,12 @@ public class ProductRepository {
                 String[] parts = line.split(";");
                 if (parts.length < 3) continue;
 
-                String type = parts[0];
-                String name = parts[1];
-                String caloriesString = parts[2].replace(",", ".");
-                double calories = parseDoubleWithLocaleFix(caloriesString);
-
                 try {
+                    String type = parts[0];
+                    String name = parts[1];
+                    String caloriesString = parts[2].replace(",", ".");
+                    double calories = parseDoubleWithLocaleFix(caloriesString);
+
                     IProduct product = null;
                     switch (type) {
                         case "RootVegetable":
