@@ -157,4 +157,5 @@ public class ProductRepository {
 
         return Double.parseDouble(value.replace(",", "."));
     }
+
 }

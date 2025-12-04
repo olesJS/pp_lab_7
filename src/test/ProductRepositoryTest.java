@@ -158,4 +158,66 @@ class ProductRepositoryTest {
         assertEquals(1, products.size(), "Мав завантажитись лише 1 коректний продукт");
         assertEquals("Potato", products.get(0).getName());
     }
+
+    @Test
+    void shouldHandleSaveError_WhenWritingFails() throws IOException {
+        // 1. Arrange (Підготовка)
+
+        // Створюємо ПАПКУ з назвою, яку ми потім передамо як шлях до файлу
+        String directoryName = "bad_path_is_a_directory";
+        Path badPath = Paths.get(directoryName);
+        Files.createDirectories(badPath); // Створили папку
+
+        // Ініціалізуємо репозиторій.
+        // Він буде думати, що "bad_path_is_a_directory" - це його файл для запису.
+        ProductRepository repo = new ProductRepository(directoryName);
+
+        // Додаємо продукт, щоб saveToFile() точно спробував щось записати
+        repo.addProduct(new RootVegetable("Test", 10, 1, true));
+
+        // Перехоплюємо System.err, щоб перевірити вивід помилки
+        java.io.ByteArrayOutputStream errContent = new java.io.ByteArrayOutputStream();
+        java.io.PrintStream originalErr = System.err;
+        System.setErr(new java.io.PrintStream(errContent));
+
+        try {
+            // 2. Act (Дія)
+            // Викликаємо метод збереження.
+            // Files.write() спробує записати у папку і впаде з IOException.
+            repo.saveToFile();
+
+            // 3. Assert (Перевірка)
+            String output = errContent.toString();
+
+            // Перевіряємо, що спрацював catch і вивів повідомлення
+            assertTrue(output.contains("Помилка збереження файлу продуктів"),
+                    "Має бути виведено повідомлення про помилку збереження");
+
+            // Можна також перевірити, що там є текст системної помилки (опціонально)
+            // Наприклад, "Is a directory" або "Access is denied"
+
+        } finally {
+            System.setErr(originalErr);
+            Files.deleteIfExists(badPath);
+        }
+    }
+
+    @Test
+    void shouldThrowException_WhenParsingNull_UsingReflection() throws Exception {
+        // 1. Arrange
+        ProductRepository repo = new ProductRepository("dummy.txt");
+
+        java.lang.reflect.Method method = ProductRepository.class.getDeclaredMethod("parseDoubleWithLocaleFix", String.class);
+        method.setAccessible(true);
+
+        // 2. Act & Assert
+        java.lang.reflect.InvocationTargetException exception = assertThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> method.invoke(repo, (String) null)
+        );
+
+        // 3. Перевіряємо справжню причину (Cause)
+        assertTrue(exception.getCause() instanceof NumberFormatException);
+        assertEquals("Рядок для парсингу є null.", exception.getCause().getMessage());
+    }
 }

@@ -14,6 +14,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -177,5 +183,155 @@ class SaladRepositoryTest {
         // Але в РЕПОЗИТОРІЇ він має залишитись!
         assertEquals(0, retrievedList.size(), "Локальний список має стати порожнім");
         assertEquals(2, saladRepository.getAllSalads().size(), "Репозиторій не повинен постраждати від змін у отриманому списку");
+    }
+
+    @Test
+    void shouldHandleExceptionWhenDirectoryCreationFails() throws IOException {
+        // 1. Arrange (Підготовка)
+        // Створюємо тимчасовий ФАЙЛ (не папку)
+        String conflictName = "conflict_file_test";
+        Path conflictPath = Paths.get(conflictName);
+
+        // Переконуємось, що його немає, і створюємо новий файл
+        Files.deleteIfExists(conflictPath);
+        Files.createFile(conflictPath);
+
+        // Підготовка залежності (ProductRepository)
+        ProductRepository dummyProductRepo = new ProductRepository("dummy.txt");
+
+        // ПЕРЕХОПЛЕННЯ SYSTEM.ERR
+        // Ми підміняємо стандартний потік помилок, щоб прочитати, що туди напише програма
+        ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(errContent));
+
+        try {
+            // 2. Act (Дія)
+            // Намагаємось створити репозиторій, вказуючи шлях до існуючого ФАЙЛУ як директорію.
+            // Files.createDirectories() впаде з помилкою, бо "файл вже існує".
+            new SaladRepository(conflictName, dummyProductRepo);
+
+            // 3. Assert (Перевірка)
+            // Отримуємо текст, який був написаний у System.err
+            String errorMessage = errContent.toString();
+
+            // Перевіряємо, що повідомлення містить наш текст помилки
+            assertTrue(errorMessage.contains("Помилка створення директорії"),
+                    "Має бути виведено повідомлення про помилку в System.err");
+
+            assertTrue(errorMessage.contains(conflictName),
+                    "Повідомлення має містити шлях, який викликав помилку");
+
+        } finally {
+            System.setErr(originalErr);
+            Files.deleteIfExists(conflictPath);
+            Files.deleteIfExists(Paths.get("dummy.txt"));
+        }
+    }
+
+    @Test
+    void shouldHandleExceptionWhenParentDirectoryCreationFails() throws IOException {
+        String blockerFileName = "file_that_blocks_directory";
+        Path blockerPath = Paths.get(blockerFileName);
+
+        Files.deleteIfExists(blockerPath);
+        Files.createFile(blockerPath);
+
+        String impossiblePath = blockerFileName + "/products.txt";
+
+        java.io.ByteArrayOutputStream errContent = new java.io.ByteArrayOutputStream();
+        java.io.PrintStream originalErr = System.err;
+        System.setErr(new java.io.PrintStream(errContent));
+
+        try {
+            new ProductRepository(impossiblePath);
+
+            String output = errContent.toString();
+
+            assertTrue(output.contains("Помилка створення папки"),
+                    "Має бути виведено повідомлення про помилку створення папки");
+            assertTrue(output.contains(impossiblePath),
+                    "Повідомлення має містити проблемний шлях");
+
+        } finally {
+            System.setErr(originalErr);
+            Files.deleteIfExists(blockerPath);
+        }
+    }
+
+    @Test
+    void shouldHandleCorruptFile_InnerCatch() throws IOException {
+        // ТЕСТ ДЛЯ: catch (IOException | NumberFormatException e)
+        // Сценарій: Файл існує, але вага інгредієнта не є числом.
+
+        // 1. Arrange
+        // Створюємо валідну структуру
+        SaladRepository repo = new SaladRepository(TEST_SALADS_DIR, productRepository);
+
+        // Створюємо файл "ПомилковийСалат.txt" з некоректними даними
+        Path badFilePath = Paths.get(TEST_SALADS_DIR, "ПомилковийСалат.txt");
+        // "Морква" існує, але "NotANumber" викличе NumberFormatException
+        Files.write(badFilePath, List.of("Морква;NotANumber"));
+
+        // Перехоплюємо потік помилок (System.err)
+        java.io.ByteArrayOutputStream errContent = new java.io.ByteArrayOutputStream();
+        java.io.PrintStream originalErr = System.err;
+        System.setErr(new java.io.PrintStream(errContent));
+
+        try {
+            // 2. Act
+            repo.loadAllSalads();
+
+            // 3. Assert
+            String output = errContent.toString();
+
+            // Перевіряємо, що спрацював внутрішній catch
+            assertTrue(output.contains("Помилка завантаження рецепту"),
+                    "Має вивестись повідомлення про помилку файлу");
+            assertTrue(output.contains("ПомилковийСалат.txt"),
+                    "Повідомлення має містити назву проблемного файлу");
+
+        } finally {
+            // Повертаємо консоль назад
+            System.setErr(originalErr);
+        }
+    }
+
+    @Test
+    void shouldHandleDirectoryAccessError_OuterCatch() throws IOException {
+        // ТЕСТ ДЛЯ: catch (IOException e) (зовнішній)
+        // Сценарій: Папка з рецептами зникла або стала недоступною перед завантаженням.
+
+        // 1. Arrange
+        // Створюємо репозиторій (папка створюється в конструкторі)
+        SaladRepository repo = new SaladRepository(TEST_SALADS_DIR, productRepository);
+
+        // ХАК: Видаляємо папку "з-під ніг" репозиторію
+        // Тепер directoryPath вказує на неіснуюче місце
+        deleteDirectoryRecursively(Paths.get(TEST_SALADS_DIR));
+
+        // Перехоплюємо System.err
+        java.io.ByteArrayOutputStream errContent = new java.io.ByteArrayOutputStream();
+        java.io.PrintStream originalErr = System.err;
+        System.setErr(new java.io.PrintStream(errContent));
+
+        try {
+            // 2. Act
+            // Files.walk(path) кине NoSuchFileException (який є IOException),
+            // бо папки фізично немає
+            repo.loadAllSalads();
+
+            // 3. Assert
+            String output = errContent.toString();
+
+            // Перевіряємо, що спрацював зовнішній catch
+            assertTrue(output.contains("Помилка доступу до папки рецептів"),
+                    "Має вивестись повідомлення про помилку доступу до папки");
+            assertTrue(output.contains(TEST_SALADS_DIR),
+                    "Повідомлення має містити шлях до папки");
+
+        } finally {
+            System.setErr(originalErr);
+        }
     }
 }
